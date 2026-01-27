@@ -1,4 +1,4 @@
-Age,Gender,Weight (kg),Daily Water Intake (liters),Physical Activity Level,Weather,Hydration Level
+Age,Gender,Weight,Daily Water Intake,Physical Activity Level,Weather,Hydration Level
 56,Male,96,4.23,Moderate,Hot,Good
 60,Male,105,3.95,High,Normal,Good
 36,Male,68,2.39,Moderate,Cold,Good
