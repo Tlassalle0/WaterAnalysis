@@ -271,9 +271,11 @@ with tab2:
             bad_tables[1],
             use_container_width=True
         )
+    median_diff = (good_tables[1] - bad_tables[1]).stack().mean().round(2).item()
+    st.markdown(f"La médiane de la différence de consommation d'eau quotidienne entre les niveaux d'hydratation bon et mauvais est de : **{median_diff}** litres.")
 
 st.subheader("Analysis")
-tab1, tab2, tab3 ,tab4= st.tabs(["Genre", "Activité Physique", "Weather" , "Poids & Weather"])
+tab1, tab2, tab3 ,tab4,tab5= st.tabs(["Genre", "Activité Physique", "Weather" , "Poids","Poids & Weather"])
 
 with tab1:
     col1, col2 = st.columns([1, 1]) 
@@ -387,7 +389,69 @@ with tab3:
         - On observe que les conditions météorologiques influencent le niveau d'hydratation des individus.
         - Par temps froid, une proportion plus élevée d'individus présente un niveau d'hydratation "Poor", ce qui suggère que la froid peut réduire la sensation de soif et donc la consommation d'eau.""")
 
+
 with tab4:
+    col1, col2 = st.columns([1, 1])
+    with col1:
+
+
+        st.subheader("Hydration Level by Weight Group")
+
+        # Group counts
+        counts = (
+            df.groupby(["Weight Group", "Hydration Level"])
+            .size()
+            .unstack(fill_value=0)
+        )
+
+        # Create figure
+        fig, ax = plt.subplots(figsize=(6, 4))
+
+        counts.plot(
+            kind="bar",
+            stacked=True,
+            ax=ax
+        )
+
+        ax.set_xlabel("Weight Group")
+        ax.set_ylabel("Count")
+        ax.set_title("Hydration Level by Weight Group")
+        ax.legend(title="Hydration Level")
+
+        # Totals per weight group
+        totals = counts.sum(axis=1)
+
+        # Add percentage labels
+        for container, level in zip(ax.containers, counts.columns):
+            for rect, total in zip(container, totals):
+                height = rect.get_height()
+                if height > 0:
+                    percentage = height / total * 100
+                    ax.text(
+                        rect.get_x() + rect.get_width() / 2,
+                        rect.get_y() + height / 2,
+                        f"{percentage:.1f}%",
+                        ha="center",
+                        va="center",
+                        fontsize=8,
+                        color="white"
+                    )
+
+        plt.tight_layout()
+
+        # Display in Streamlit
+        st.pyplot(fig)
+
+    with col2:
+        st.write("""
+        **Observations:**
+        - On observe que les individus en dessous de 60 kg ont tendance à avoir un taux de niveau d'hydratation "Good" plus élevé.
+        - Cela peut s'expliquer par le fait que les individus avec un poids corporel plus léger ont des besoins en hydratation plus faible.
+        """)
+
+
+
+with tab5:
     col1, col2 = st.columns([1, 1]) 
     with col1:
 
