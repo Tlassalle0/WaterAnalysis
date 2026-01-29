@@ -66,7 +66,7 @@ with tab1:
 
         ax.hist(df["Age"].dropna())
         ax.set_xlabel("Age")
-        ax.set_ylabel("Count")
+        ax.set_ylabel("Nombre")
         ax.set_title("Répartition de l'âge")
         mean_age = df["Age"].mean()
         median_age = df["Age"].median()
@@ -74,6 +74,8 @@ with tab1:
         ax.axvline(median_age,color='green', linestyle='dashed', linewidth=1 , label=f"Âge médian: {median_age:.1f}")
         ax.legend()
         st.pyplot(fig)
+
+        
     
     with col2:
         st.write("""
@@ -94,7 +96,7 @@ with tab2:
         ax.hist(df["Weight"].dropna())
         ax.set_xlabel("Poids")
         ax.set_ylabel("Nombre")
-        ax.set_title("Répartition of Weight")
+        ax.set_title("Répartition du Poids")
         mean_weight = df["Weight"].mean()
         median_weight = df["Weight"].median()
         ax.axvline(mean_weight,color='red', linestyle='dashed', linewidth=1 , label=f"Poids moyen: {mean_weight:.1f}")
@@ -136,9 +138,9 @@ with tab4:
     with col1:
         fig, ax = plt.subplots(figsize=(4,3))
 
-        ax.hist(df["Activité Physique"].dropna())
+        ax.hist(df["Physical Activity Level"].dropna())
         ax.set_xlabel("Activité Physique")
-        ax.set_ylabel("Count")
+        ax.set_ylabel("Nombre")
         ax.set_title("Répartition de l'activité physique")
         st.pyplot(fig)
 
@@ -152,14 +154,14 @@ with tab4:
 
 
 with tab5:
-    col1, col2 = st.columns([1, 1])  # graph takes 1/3 of width
+    col1, col2 = st.columns([1, 1]) 
     with col1:
         fig, ax = plt.subplots(figsize=(4,3))
 
         ax.hist(df["Hydration Level"].dropna())
         ax.set_xlabel("Niveau d'hydratation")
-        ax.set_ylabel("Count")
-        ax.set_title("Répartition of niveau d'hydratation")
+        ax.set_ylabel("Nombre")
+        ax.set_title("Répartition du niveau d'hydratation")
         
         st.pyplot(fig)
 
@@ -286,8 +288,8 @@ with tab2:
     median_diff = (good_tables[1] - bad_tables[1]).stack().mean().round(2).item()
     st.markdown(f"La médiane de la différence de consommation d'eau quotidienne entre les niveaux d'hydratation bon et mauvais est de : **{median_diff}** litres.")
 
-st.subheader("Analysis")
-tab1, tab2, tab3 ,tab4,tab5,tab6,tab7= st.tabs(["Genre", "Activité Physique", "Weather" ,"Age", "Poids","Poids & Weather","Age & Weather"])
+st.subheader("Analyses")
+tab1, tab2, tab3 ,tab4,tab5,tab6,tab7= st.tabs(["Genre", "Activité Physique", "Climat" ,"Age", "Poids","Poids & Climat","Age & Climat"])
 
 with tab1:
     col1, col2 = st.columns([1, 1]) 
@@ -406,7 +408,6 @@ with tab4:
     col1, col2 = st.columns([1, 1]) 
     with col1:
 
-        st.subheader("Hydration Level by Age Group")
 
         # Group counts
         counts = (
@@ -424,10 +425,10 @@ with tab4:
             ax=ax
         )
 
-        ax.set_xlabel("Age Group")
-        ax.set_ylabel("Count")
-        ax.set_title("Hydration Level by Age Group")
-        ax.legend(title="Hydration Level")
+        ax.set_xlabel("Groupe d'âge")
+        ax.set_ylabel("Nombre")
+        ax.set_title("Niveau d'hydratation selon l'âge")
+        ax.legend(title="Niveau d'hydratation")
 
         # Totals per age group
         totals = counts.sum(axis=1)
@@ -453,7 +454,12 @@ with tab4:
         # Display in Streamlit
         st.pyplot(fig)
 
-
+    with col2:
+        st.write("""
+        **Observations:**
+        - On observe que les individus plus agés ont tendance à avoir un taux de niveau d'hydratation "Poor" plus élevé.
+        - Cela peut s'expliquer par le fait que la sensation de soif diminue avec l'âge, ce qui peut entraîner une consommation d'eau insuffisante chez les personnes âgées.
+        """)
 
 with tab5:
     col1, col2 = st.columns([1, 1])
@@ -606,13 +612,20 @@ with tab7:
         # Axis & labels
         ax.set_xticks(x + width)
         ax.set_xticklabels(age_groups)
-        ax.set_xlabel("Age Group")
-        ax.set_ylabel("Count")
+        ax.set_xlabel("Groupe d'âge")
+        ax.set_ylabel("Nombre")
         ax.set_ylim(0, ax.get_ylim()[1] + 200)  # increase the top by 200 counts
-        ax.set_title("Hydration Level by Age Group and Climate")
+        ax.set_title("Niveau d'hydratation selon l'âge et le climat")
 
         # Legend (only hydration levels, not duplicated climates)
-        ax.legend(title="Hydration Level")
+        ax.legend(title="Niveau d'hydratation")
 
         plt.tight_layout()
         st.pyplot(fig)
+
+    with col2:
+        st.write("""
+        **Observations:**
+        - On observe que les individus plus âgés ont tendance à avoir un taux de niveau d'hydratation "Poor" plus élevé, en particulier par temps froid.
+        - Cela peut s'expliquer par le fait que la sensation de soif diminue avec l'âge, ce qui peut entraîner une consommation d'eau insuffisante chez les personnes âgées, surtout en climat froid où la sensation de soif est encore plus réduite.
+        """)

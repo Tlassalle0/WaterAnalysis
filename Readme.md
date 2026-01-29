@@ -38,14 +38,26 @@ Les résultats sont visible sur une visualisation interactive en utilisant Strea
 
 ---
 
-## 📁 Project Structure
+## 📁 Structure du Projet
 ```
 WaterAnalysis/
 │── data/
 │ └── 1-raw
+│   └── Daily_water_Intake.csv
 │ └── 2-cleaned
+│   └── water_intake_cleaned.csv
+│ └── 3-processed
+│── notebook/
+│── script/
+│ └── 1_clean.ipynb
+│ └── 2-data_overview.ipynb
+│ └── 3-stats.ipynb
+│ └── 4-analysis.ipynb
+│ └── 5-analysis_visualisation.ipynb
+│── src/
+│ └── steamlit.py
 │── requirements.txt
-│── README.md
+│── Readme.md
 
 ```
 
@@ -57,3 +69,12 @@ This project was developed for educational purposes to practice:
 - Data analysis with Pandas
 - Data visualization
 - Building interactive dashboards with Streamlit
+
+
+---
+
+## 👥 Auteurs
+
+- Lassalle Tibor
+- Vassy Mathis
+
