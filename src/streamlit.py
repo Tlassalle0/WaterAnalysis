@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import numpy as np
 
 
 # Page config
@@ -12,7 +13,7 @@ st.set_page_config(
 
 )
 # Load data
-df=pd.read_csv('C:/Users/MV_pe/OneDrive/Documents/Ynov/B3_(2025-2026)/Analyse et Exploration de Données/Projet/WaterAnalysis/data/2_cleaned/water_intake_cleaned.csv')
+df = pd.read_csv('data/2_cleaned/water_intake_cleaned.csv')
 df_grpWeight=df.copy()
 palette_weight = {
     '<60 kg': 'lightgreen',
@@ -29,6 +30,17 @@ df_grpWeight["Weight Group"] = pd.cut(
     bins=weight_bins,
     labels=weight_labels
 )
+
+age_bins = [18, 30, 40, 50, 60, 70]
+age_labels = ["18–29", "30–39", "40–49", "50–59", "60–70"]
+
+df["Age Group"] = pd.cut(
+    df["Age"],
+    bins=age_bins,
+    labels=age_labels,
+    include_lowest=True
+)
+
 
 
 
@@ -274,8 +286,8 @@ with tab2:
     median_diff = (good_tables[1] - bad_tables[1]).stack().mean().round(2).item()
     st.markdown(f"La médiane de la différence de consommation d'eau quotidienne entre les niveaux d'hydratation bon et mauvais est de : **{median_diff}** litres.")
 
-st.subheader("Analyse")
-tab1, tab2, tab3 ,tab4,tab5= st.tabs(["Genre", "Activité Physique", "Climat" , "Poids","Poids & Climat"])
+st.subheader("Analysis")
+tab1, tab2, tab3 ,tab4,tab5,tab6,tab7= st.tabs(["Genre", "Activité Physique", "Weather" ,"Age", "Poids","Poids & Weather","Age & Weather"])
 
 with tab1:
     col1, col2 = st.columns([1, 1]) 
@@ -391,6 +403,59 @@ with tab3:
 
 
 with tab4:
+    col1, col2 = st.columns([1, 1]) 
+    with col1:
+
+        st.subheader("Hydration Level by Age Group")
+
+        # Group counts
+        counts = (
+            df.groupby(["Age Group", "Hydration Level"])
+            .size()
+            .unstack(fill_value=0)
+        )
+
+        # Create figure
+        fig, ax = plt.subplots(figsize=(6, 4))
+
+        counts.plot(
+            kind="bar",
+            stacked=True,
+            ax=ax
+        )
+
+        ax.set_xlabel("Age Group")
+        ax.set_ylabel("Count")
+        ax.set_title("Hydration Level by Age Group")
+        ax.legend(title="Hydration Level")
+
+        # Totals per age group
+        totals = counts.sum(axis=1)
+
+        # Add percentage labels
+        for container, level in zip(ax.containers, counts.columns):
+            for rect, total in zip(container, totals):
+                height = rect.get_height()
+                if height > 0:
+                    percentage = height / total * 100
+                    ax.text(
+                        rect.get_x() + rect.get_width() / 2,
+                        rect.get_y() + height / 2,
+                        f"{percentage:.1f}%",
+                        ha="center",
+                        va="center",
+                        fontsize=8,
+                        color="white"
+                    )
+
+        plt.tight_layout()
+
+        # Display in Streamlit
+        st.pyplot(fig)
+
+
+
+with tab5:
     col1, col2 = st.columns([1, 1])
     with col1:
 
@@ -451,7 +516,7 @@ with tab4:
 
 
 
-with tab5:
+with tab6:
     col1, col2 = st.columns([1, 1]) 
     with col1:
 
@@ -489,3 +554,65 @@ with tab5:
         - De plus, la consommation d'eau augmente avec la température, ce qui est cohérent avec le fait que les besoins en hydratation augmentent par temps chaud en raison de la transpiration accrue.
         """)
 
+
+with tab7:
+    col1, col2 = st.columns([1, 1])
+    with col1:
+            
+
+        counts = (
+            df.groupby(["Age Group", "Weather", "Hydration Level"])
+            .size()
+            .unstack(fill_value=0)
+        )
+        # Order definitions
+        age_groups = counts.index.get_level_values("Age Group").unique()
+        weathers = ["Cold", "Normal", "Hot"]
+
+        x = np.arange(len(age_groups))
+        width = 0.25
+
+        fig, ax = plt.subplots(figsize=(10, 6))
+
+        for i, weather in enumerate(weathers):
+            data = counts.xs(weather, level="Weather")
+
+            good = data.get("Good", 0)
+            poor = data.get("Poor", 0)
+
+            # Good hydration (blue)
+            ax.bar(
+                x + i * width,
+                good,
+                width,
+                color="tab:blue",
+                edgecolor="black",
+                linewidth=0.8,
+                label="Good" if i == 0 else None
+            )
+
+            # Poor hydration (orange)
+            ax.bar(
+                x + i * width,
+                poor,
+                width,
+                bottom=good,
+                color="tab:orange",
+                edgecolor="black",
+                linewidth=0.8,
+                label="Poor" if i == 0 else None
+            )
+
+        # Axis & labels
+        ax.set_xticks(x + width)
+        ax.set_xticklabels(age_groups)
+        ax.set_xlabel("Age Group")
+        ax.set_ylabel("Count")
+        ax.set_ylim(0, ax.get_ylim()[1] + 200)  # increase the top by 200 counts
+        ax.set_title("Hydration Level by Age Group and Climate")
+
+        # Legend (only hydration levels, not duplicated climates)
+        ax.legend(title="Hydration Level")
+
+        plt.tight_layout()
+        st.pyplot(fig)
