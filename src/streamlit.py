@@ -12,51 +12,416 @@ st.set_page_config(
 
 )
 # Load data
-df=pd.read_csv('C:/Users/MV_pe/OneDrive/Documents/Ynov/B3_(2025-2026)/Analyse et Exploration de Données/Projet/WaterAnalysis/data/2-interim/Daily_Water_Intake_Cleaned.csv')
+df=pd.read_csv('C:/Users/MV_pe/OneDrive/Documents/Ynov/B3_(2025-2026)/Analyse et Exploration de Données/Projet/WaterAnalysis/data/2_cleaned/water_intake_cleaned.csv')
+df_grpWeight=df.copy()
+palette_weight = {
+    '<60 kg': 'lightgreen',
+    '60–80 kg': 'orange',
+    '80–100 kg': 'lightcoral',
+    '>100 kg': 'purple'
+}
 
+weight_bins = [0, 60, 80, 100, float("inf")]
+weight_labels = ["<60 kg", "60–80 kg", "80–100 kg", ">100 kg"]
+
+df_grpWeight["Weight Group"] = pd.cut(
+    df_grpWeight["Weight"],
+    bins=weight_bins,
+    labels=weight_labels
+)
 
 
 
 st.title("Water Intake Analysis 📊")
-st.write("Hello Worlds!")
+st.write("""Ce dashboard présente une analyse des données relatives à la consommation d'eau quotidienne des individus, en fonction de divers facteurs tels que l'âge, le poids, le genre, le niveau d'activité physique, le niveau d'hydratation et les conditions météorologiques.""")#----------------------------------------
 
 
 
-# Sidebar
-st.sidebar.title("Navigation")
-page = st.sidebar.radio("Aller à", ["Accueil", "Analyse", "Visualisation"])
 
-
-st.subheader("Daily Water Intake by Gender")
-
-
+# Tabs
+st.subheader("Overview Tabs")
+tab1, tab2, tab3, tab4, tab5 ,tab6= st.tabs(["Age", "Poids", "Genre", "Activité Physique", "Niveau d'Hydratation", "Apport quotidien en Eau"])
 
 
 
 
 
 
+with tab1:
+    col1, col2 = st.columns([1, 1]) 
+    with col1:
+        fig, ax = plt.subplots(figsize=(4,3))
 
-fig, ax = plt.subplots(figsize=(8, 6))
+        ax.hist(df["Age"].dropna())
+        ax.set_xlabel("Age")
+        ax.set_ylabel("Count")
+        ax.set_title("Distribution of Age")
+        mean_age = df["Age"].mean()
+        median_age = df["Age"].median()
+        ax.axvline(mean_age,color='red', linestyle='dashed', linewidth=1 , label=f"Mean age: {mean_age:.1f}")
+        ax.axvline(median_age,color='green', linestyle='dashed', linewidth=1 , label=f"Median age: {median_age:.1f}")
+        ax.legend()
+        st.pyplot(fig)
+    
+    with col2:
+        st.write("""
+        **Observations:**
+        - L'âge moyen des individus dans le dataset est d'environ 43 ans.
+        - L'âge médian est également proche de 43 ans, indiquant une distribution relativement symétrique.
+        - Cette symétrie suggère qu'il n'y a pas de biais significatif vers les jeunes ou les personnes âgées dans l'échantillon ou dans le cas présent que le datatset à été généré.
+        """)
 
-palette = {
-    'Male': 'skyblue',
-    'Female': 'lightpink'
-}
 
-# Boxplot
-sns.boxplot(
-    data=df,
-    x="Gender",
-    y="Daily Water Intake (liters)",
-    palette=palette,
-    ax=ax
+
+
+with tab2:
+    col1, col2 = st.columns([1, 1])  
+    with col1:
+        fig, ax = plt.subplots(figsize=(4,3))
+
+        ax.hist(df["Weight"].dropna())
+        ax.set_xlabel("Weight")
+        ax.set_ylabel("Count")
+        ax.set_title("Distribution of Weight")
+        mean_weight = df["Weight"].mean()
+        median_weight = df["Weight"].median()
+        ax.axvline(mean_weight,color='red', linestyle='dashed', linewidth=1 , label=f"Mean weight: {mean_weight:.1f}")
+        ax.axvline(median_weight,color='green', linestyle='dashed', linewidth=1 , label=f"Median weight: {median_weight:.1f}")
+        ax.legend()
+        st.pyplot(fig)
+    
+    with col2:
+        st.write("""
+        **Observations:**
+        - Le poids moyen des individus dans le dataset est d'environ 75 kg.
+        - Le poids médian est également proche de 77 kg, indiquant une distribution relativement symétrique.
+        - Cette symétrie suggère qu'il n'y a pas de biais significatif vers les individus plus légers ou plus lourds dans l'échantillon ou dans le cas présent que le datatset à été généré.
+        """)
+    
+
+with tab3:
+    col1, col2 = st.columns([1, 1])  
+    with col1:
+        fig, ax = plt.subplots(figsize=(4,3))
+
+        ax.hist(df["Gender"].dropna())
+        ax.set_xlabel("Gender")
+        ax.set_ylabel("Count")
+        ax.set_title("Distribution of Gender")
+        st.pyplot(fig)
+
+    with col2:
+        st.write("""
+        **Observations:**
+        - La répartition des genres dans le dataset est relativement équilibrée entre les hommes et les femmes.
+        - Cela suggère que l'échantillon est soit très équilibré, soit que le dataset a été généré pour inclure un nombre égal d'hommes et de femmes.
+        """)
+
+
+
+with tab4:
+    col1, col2 = st.columns([1, 1]) 
+    with col1:
+        fig, ax = plt.subplots(figsize=(4,3))
+
+        ax.hist(df["Physical Activity Level"].dropna())
+        ax.set_xlabel("Physical Activity Level")
+        ax.set_ylabel("Count")
+        ax.set_title("Distribution of Physical Activity Level")
+        st.pyplot(fig)
+
+    with col2:
+        st.write("""
+        **Observations:**
+        - On retrouve une répartition encore parfaite entre les différents niveaux d'activité physique.
+        - Cela suggère que le dataset a été généré pour inclure un nombre égal d'individus dans chaque catégorie d'activité physique.
+        """)
+
+
+
+with tab5:
+    col1, col2 = st.columns([1, 1])  # graph takes 1/3 of width
+    with col1:
+        fig, ax = plt.subplots(figsize=(4,3))
+
+        ax.hist(df["Hydration Level"].dropna())
+        ax.set_xlabel("Hydration Level")
+        ax.set_ylabel("Count")
+        ax.set_title("Distribution of Hydration Level")
+        
+        st.pyplot(fig)
+
+    with col2:
+        st.write("""
+        **Observations:**
+        - Une proportion significative des individus dans le dataset sont classés comme ayant un niveau d'hydratation "Good".
+        """)
+
+with tab6:
+    col1, col2 = st.columns([1, 1]) 
+    with col1:
+        fig, ax = plt.subplots(figsize=(4,3))
+        sns.histplot(
+            data=df,
+            x="Daily Water Intake",
+            bins=20,
+            kde=True,
+            color="blue",
+            ax=ax
+        )
+        ax.set_xlabel("Daily Water Intake (liters)")
+        ax.set_ylabel("Count")
+        ax.set_title("Distribution of Daily Water Intake")
+        st.pyplot(fig)
+
+    with col2:
+        st.write("""
+        **Observations:**
+        - une quantité très élevée de personne consomme seulement 1,5 litres d'eau par jour.
+        - La consommation quotidienne d'eau des individus dans le dataset suit une distribution normale.
+        - La majorité des individus consomment entre 2 et 3,5 litres d'eau par jour, avec une moyenne autour de 3 litres.
+        - Quelques individus consomment des quantités très élevées d'eau, ce qui pourrait indiquer des besoins spécifiques ou des comportements particuliers comme le poids ou la température.
+        """)
+
+#----------------------------------------
+# Mean & Median Poor Daily Water Intake Table
+
+
+weight_bins = [0, 60, 80, 100, float("inf")]
+weight_labels = ["<60 kg", "60–80 kg", "80–100 kg", ">100 kg"]
+
+df["Weight Group"] = pd.cut(
+    df["Weight"],
+    bins=weight_bins,
+    labels=weight_labels
 )
 
-# Labels
-ax.set_title("Daily Water Intake by Gender")
-ax.set_xlabel("Gender")
-ax.set_ylabel("Daily Water Intake (liters)")
 
-# Display in Streamlit
-st.pyplot(fig, use_container_width=True)
+df_good = df[df["Hydration Level"] == "Good"]
+df_bad = df[df["Hydration Level"] == "Poor"]
+
+
+def make_tables(dataframe):
+    grid_mean = (
+    dataframe.groupby(["Weight Group", "Weather"])["Daily Water Intake"]
+      .agg(["mean"])
+      .round(2)
+      )
+    grid_mean_table = grid_mean.unstack(level="Weather")
+
+    grid_mean_table = grid_mean_table.reindex(
+        columns=["Cold", "Normal", "Hot"],
+        level=1
+    )
+
+    grid_med = (
+        dataframe.groupby(["Weight Group", "Weather"])["Daily Water Intake"]
+        .agg(["median"])
+        .round(2)
+    )
+    grid_med_table = grid_med.unstack(level="Weather")
+    grid_med_table = grid_med_table.reindex(
+        columns=["Cold", "Normal", "Hot"],
+        level=1
+    )
+
+    return grid_mean_table, grid_med_table
+
+
+
+
+
+
+
+
+good_tables = make_tables(df_good)
+bad_tables = make_tables(df_bad)
+
+st.subheader("MEAN & MEDIAN Poor Daily Water Intake")
+tab1, tab2= st.tabs(["Mean", "Median"])
+
+with tab1:
+    col1, col2 = st.columns([1, 1]) 
+    with col1:
+        st.markdown("Good Hydration Level")
+        st.dataframe(
+            good_tables[0],
+            use_container_width=True
+        )
+    with col2:
+        st.markdown("Poor Hydration Level")
+        st.dataframe(
+            bad_tables[0],
+            use_container_width=True
+        )
+    
+    mean_diff = (good_tables[0] - bad_tables[0]).stack().mean().round(2).item()
+    st.markdown(f"La moyenne de la différence de consommation d'eau quotidienne entre les niveaux d'hydratation bon et mauvais est de : **{mean_diff}** litres.")
+with tab2:
+    col1, col2 = st.columns([1, 1])
+    with col1:
+        st.markdown("Good Hydration Level")
+        st.dataframe(
+            good_tables[1],
+            use_container_width=True
+        )
+    with col2:
+        st.markdown("Poor Hydration Level")
+        st.dataframe(
+            bad_tables[1],
+            use_container_width=True
+        )
+
+st.subheader("Analysis")
+tab1, tab2, tab3 ,tab4= st.tabs(["Genre", "Activité Physique", "Weather" , "Poids & Weather"])
+
+with tab1:
+    col1, col2 = st.columns([1, 1]) 
+    with col1:
+        
+        fig, ax = plt.subplots(figsize=(8, 6))
+        palette = {
+            'Male': 'skyblue',
+            'Female': 'lightpink'
+        }
+
+        # Boxplot
+        sns.boxplot(
+            data=df,
+            x="Gender",
+            y="Daily Water Intake",
+            palette=palette,
+            ax=ax
+        )
+
+        # Labels
+        ax.set_title("Daily Water Intake by Gender")
+        ax.set_xlabel("Gender")
+        ax.set_ylabel("Daily Water Intake (liters)")
+
+        # Display in Streamlit
+        st.pyplot(fig, use_container_width=True)
+    
+    with col2:
+        st.write("""
+        **Observations:**
+        - On observe que le genre n'a pas d'impact significatif sur la consommation d'eau quotidienne.
+        - La similarité execive entre les deux boxplots souligne encore la possible .
+        """)
+    
+with tab2:
+    col1, col2 = st.columns([1, 1]) 
+    with col1:
+        df['Physical Activity Level'] = pd.Categorical(
+            df['Physical Activity Level'],
+            categories=['Low', 'Moderate', 'High'],
+            ordered=True
+        )
+
+        # Compute mean water intake
+        activity_water = (
+            df.groupby("Physical Activity Level")["Daily Water Intake"]
+            .mean()
+        )
+
+        # Create figure
+        fig, ax = plt.subplots(figsize=(5, 4))
+
+        ax.bar(
+            activity_water.index,
+            activity_water.values
+        )
+
+        ax.set_title("Average Daily Water Intake by Physical Activity Level")
+        ax.set_xlabel("Physical Activity Level")
+        ax.set_ylabel("Daily Water Intake (liters)")
+
+        # Display in Streamlit
+        st.pyplot(fig)
+
+    with col2:
+        st.write("""
+        **Observations:**
+        - Il y a une tendance claire indiquant que les individus avec des niveaux d'activité physique plus élevés consomment davantage d'eau quotidiennement.
+        - Cela est cohérent avec les attentes, car une activité physique accrue entraîne une perte de fluides corporels, nécessitant une hydratation supplémentaire.
+        """)
+
+
+with tab3:
+    col1, col2 = st.columns([1, 1]) 
+    with col1:
+        # Ensure ordered category
+        df['Weather'] = pd.Categorical(
+            df['Weather'],
+            categories=['Cold', 'Normal', 'Hot'],
+            ordered=True
+        )
+
+        # Count occurrences
+        counts = (
+            df.groupby(["Weather", "Hydration Level"])
+            .size()
+            .unstack(fill_value=0)
+        )
+
+        # Create figure
+        fig, ax = plt.subplots(figsize=(6, 4))
+
+        counts.plot(
+            kind="bar",
+            stacked=True,
+            ax=ax
+        )
+
+        ax.set_xlabel("Weather")
+        ax.set_ylabel("Count")
+        ax.set_title("Weather vs Hydration Level")
+        ax.legend(title="Hydration Level")
+
+        # Display in Streamlit
+        st.pyplot(fig)
+
+    with col2:
+        st.write("""
+        **Observations:**
+        - On observe que les conditions météorologiques influencent le niveau d'hydratation des individus.
+        - Par temps froid, une proportion plus élevée d'individus présente un niveau d'hydratation "Poor", ce qui suggère que la froid peut réduire la sensation de soif et donc la consommation d'eau.""")
+
+with tab4:
+    col1, col2 = st.columns([1, 1]) 
+    with col1:
+
+        # Ensure ordered category
+        df_grpWeight['Weather'] = pd.Categorical(
+            df_grpWeight['Weather'],
+            categories=['Cold', 'Normal', 'Hot'],
+            ordered=True
+        )
+
+        # Create figure
+        fig, ax = plt.subplots(figsize=(6, 4))
+
+        sns.boxplot(
+            data=df_grpWeight,
+            x="Weather",
+            y="Daily Water Intake",
+            hue="Weight Group",
+            palette=palette_weight,
+            ax=ax
+        )
+
+        ax.set_title("Daily Water Intake by Weather and Weight Group")
+        ax.set_xlabel("Weather")
+        ax.set_ylabel("Daily Water Intake (liters)")
+        ax.legend(title="Weight Group")
+
+        # Display in Streamlit
+        st.pyplot(fig)
+    
+    with col2:
+        st.write("""
+        **Observations:**
+        - On observe que les individus plus lourds ont tendance à consommer davantage d'eau, ce qui est logique car un poids corporel plus élevé nécessite une hydratation accrue.
+        - De plus, la consommation d'eau augmente avec la température, ce qui est cohérent avec le fait que les besoins en hydratation augmentent par temps chaud en raison de la transpiration accrue.
+        """)
+
