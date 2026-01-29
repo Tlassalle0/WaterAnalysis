@@ -3,68 +3,38 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-#----------------------------------------
+
 # Page config
 st.set_page_config(
     page_title="Water Intake Analysis",
     page_icon="💧",
     layout="wide",
+
 )
-#----------------------------------------
-
-
-#----------------------------------------
 # Load data
 df=pd.read_csv('C:/Users/MV_pe/OneDrive/Documents/Ynov/B3_(2025-2026)/Analyse et Exploration de Données/Projet/WaterAnalysis/data/2_cleaned/water_intake_cleaned.csv')
-
-st.title("Water Intake Analysis 📊")
-
-
-
-#----------------------------------------
-
-
-
-
-
-
-
-st.subheader("Daily Water Intake by Gender")
-
-
-
-
-
-
-
-
-
-
-
-
-fig, ax = plt.subplots(figsize=(8, 6))
-
-palette = {
-    'Male': 'skyblue',
-    'Female': 'lightpink'
+df_grpWeight=df.copy()
+palette_weight = {
+    '<60 kg': 'lightgreen',
+    '60–80 kg': 'orange',
+    '80–100 kg': 'lightcoral',
+    '>100 kg': 'purple'
 }
 
-# Boxplot
-sns.boxplot(
-    data=df,
-    x="Gender",
-    y="Daily Water Intake",
-    palette=palette,
-    ax=ax
+weight_bins = [0, 60, 80, 100, float("inf")]
+weight_labels = ["<60 kg", "60–80 kg", "80–100 kg", ">100 kg"]
+
+df_grpWeight["Weight Group"] = pd.cut(
+    df_grpWeight["Weight"],
+    bins=weight_bins,
+    labels=weight_labels
 )
 
-# Labels
-ax.set_title("Daily Water Intake by Gender")
-ax.set_xlabel("Gender")
-ax.set_ylabel("Daily Water Intake (liters)")
 
-# Display in Streamlit
-st.pyplot(fig, use_container_width=True)
+
+st.title("Water Intake Analysis 📊")
+st.write("""Ce dashboard présente une analyse des données relatives à la consommation d'eau quotidienne des individus, en fonction de divers facteurs tels que l'âge, le poids, le genre, le niveau d'activité physique, le niveau d'hydratation et les conditions météorologiques.""")#----------------------------------------
+
 
 
 
@@ -213,77 +183,245 @@ with tab6:
         - Quelques individus consomment des quantités très élevées d'eau, ce qui pourrait indiquer des besoins spécifiques ou des comportements particuliers comme le poids ou la température.
         """)
 
+#----------------------------------------
+# Mean & Median Poor Daily Water Intake Table
 
-df_good = df[df["Hydration Level"] == "Poor"]
 
 weight_bins = [0, 60, 80, 100, float("inf")]
 weight_labels = ["<60 kg", "60–80 kg", "80–100 kg", ">100 kg"]
 
-df_good["Weight Group"] = pd.cut(
-    df_good["Weight"],
+df["Weight Group"] = pd.cut(
+    df["Weight"],
     bins=weight_bins,
     labels=weight_labels
 )
 
-grid_mean = (
-    df_good.groupby(["Weight Group", "Weather"])["Daily Water Intake"]
+
+df_good = df[df["Hydration Level"] == "Good"]
+df_bad = df[df["Hydration Level"] == "Poor"]
+
+
+def make_tables(dataframe):
+    grid_mean = (
+    dataframe.groupby(["Weight Group", "Weather"])["Daily Water Intake"]
       .agg(["mean"])
       .round(2)
-)
+      )
+    grid_mean_table = grid_mean.unstack(level="Weather")
 
-grid_mean_table = grid_mean.unstack(level="Weather")
+    grid_mean_table = grid_mean_table.reindex(
+        columns=["Cold", "Normal", "Hot"],
+        level=1
+    )
 
-grid_mean_table = grid_mean_table.reindex(
-    columns=["Cold", "Normal", "Hot"],
-    level=1
-)
+    grid_med = (
+        dataframe.groupby(["Weight Group", "Weather"])["Daily Water Intake"]
+        .agg(["median"])
+        .round(2)
+    )
+    grid_med_table = grid_med.unstack(level="Weather")
+    grid_med_table = grid_med_table.reindex(
+        columns=["Cold", "Normal", "Hot"],
+        level=1
+    )
 
-grid_med = (
-    df_good.groupby(["Weight Group", "Weather"])["Daily Water Intake"]
-      .agg(["median"])
-      .round(2)
-)
-grid_med_table = grid_med.unstack(level="Weather")
-grid_med_table = grid_med_table.reindex(
-    columns=["Cold", "Normal", "Hot"],
-    level=1
-)
-
-
+    return grid_mean_table, grid_med_table
 
 
-st.subheader("MEAN & MEDIAN Daily Water Intake")
+
+
+
+
+
+
+good_tables = make_tables(df_good)
+bad_tables = make_tables(df_bad)
+
+st.subheader("MEAN & MEDIAN Poor Daily Water Intake")
 tab1, tab2= st.tabs(["Mean", "Median"])
 
 with tab1:
-    st.dataframe(
-        grid_mean_table,
-        use_container_width=True
-    )
+    col1, col2 = st.columns([1, 1]) 
+    with col1:
+        st.markdown("Good Hydration Level")
+        st.dataframe(
+            good_tables[0],
+            use_container_width=True
+        )
+    with col2:
+        st.markdown("Poor Hydration Level")
+        st.dataframe(
+            bad_tables[0],
+            use_container_width=True
+        )
+    
+    mean_diff = (good_tables[0] - bad_tables[0]).stack().mean().round(2).item()
+    st.markdown(f"La moyenne de la différence de consommation d'eau quotidienne entre les niveaux d'hydratation bon et mauvais est de : **{mean_diff}** litres.")
 with tab2:
-    st.dataframe(
-        grid_med_table,
-        use_container_width=True
-    )
+    col1, col2 = st.columns([1, 1])
+    with col1:
+        st.markdown("Good Hydration Level")
+        st.dataframe(
+            good_tables[1],
+            use_container_width=True
+        )
+    with col2:
+        st.markdown("Poor Hydration Level")
+        st.dataframe(
+            bad_tables[1],
+            use_container_width=True
+        )
+
+st.subheader("Analysis")
+tab1, tab2, tab3 ,tab4= st.tabs(["Genre", "Activité Physique", "Weather" , "Poids & Weather"])
+
+with tab1:
+    col1, col2 = st.columns([1, 1]) 
+    with col1:
+        
+        fig, ax = plt.subplots(figsize=(8, 6))
+        palette = {
+            'Male': 'skyblue',
+            'Female': 'lightpink'
+        }
+
+        # Boxplot
+        sns.boxplot(
+            data=df,
+            x="Gender",
+            y="Daily Water Intake",
+            palette=palette,
+            ax=ax
+        )
+
+        # Labels
+        ax.set_title("Daily Water Intake by Gender")
+        ax.set_xlabel("Gender")
+        ax.set_ylabel("Daily Water Intake (liters)")
+
+        # Display in Streamlit
+        st.pyplot(fig, use_container_width=True)
+    
+    with col2:
+        st.write("""
+        **Observations:**
+        - On observe que le genre n'a pas d'impact significatif sur la consommation d'eau quotidienne.
+        - La similarité execive entre les deux boxplots souligne encore la possible .
+        """)
+    
+with tab2:
+    col1, col2 = st.columns([1, 1]) 
+    with col1:
+        df['Physical Activity Level'] = pd.Categorical(
+            df['Physical Activity Level'],
+            categories=['Low', 'Moderate', 'High'],
+            ordered=True
+        )
+
+        # Compute mean water intake
+        activity_water = (
+            df.groupby("Physical Activity Level")["Daily Water Intake"]
+            .mean()
+        )
+
+        # Create figure
+        fig, ax = plt.subplots(figsize=(5, 4))
+
+        ax.bar(
+            activity_water.index,
+            activity_water.values
+        )
+
+        ax.set_title("Average Daily Water Intake by Physical Activity Level")
+        ax.set_xlabel("Physical Activity Level")
+        ax.set_ylabel("Daily Water Intake (liters)")
+
+        # Display in Streamlit
+        st.pyplot(fig)
+
+    with col2:
+        st.write("""
+        **Observations:**
+        - Il y a une tendance claire indiquant que les individus avec des niveaux d'activité physique plus élevés consomment davantage d'eau quotidiennement.
+        - Cela est cohérent avec les attentes, car une activité physique accrue entraîne une perte de fluides corporels, nécessitant une hydratation supplémentaire.
+        """)
 
 
-bins = [44.99, 61, 77, 93, 109.01]
-labels = ['44.99-61 kg', '62-77 kg', '78-93 kg', '94-109.01 kg']
-df_grpWeight = df.copy()
-df_grpWeight['Weight Group'] = pd.cut(df_grpWeight['Weight'], bins=bins, labels=labels,include_lowest=True)
-palette_weight = {
-    '44.99-61 kg': 'lightgreen',
-    '62-77 kg': 'orange',
-    '78-93 kg': 'lightcoral',
-    '94-109.01 kg': 'purple'
-}
+with tab3:
+    col1, col2 = st.columns([1, 1]) 
+    with col1:
+        # Ensure ordered category
+        df['Weather'] = pd.Categorical(
+            df['Weather'],
+            categories=['Cold', 'Normal', 'Hot'],
+            ordered=True
+        )
 
+        # Count occurrences
+        counts = (
+            df.groupby(["Weather", "Hydration Level"])
+            .size()
+            .unstack(fill_value=0)
+        )
 
+        # Create figure
+        fig, ax = plt.subplots(figsize=(6, 4))
 
-df_grpWeight['Weather'] = pd.Categorical(
-    df['Weather'],
-    categories=['Cold', 'Normal', 'Hot'],
-    ordered=True
-)
+        counts.plot(
+            kind="bar",
+            stacked=True,
+            ax=ax
+        )
 
-sns.boxplot(data=df_grpWeight, x="Weather", y="Daily Water Intake", hue="Weight Group", palette=palette_weight)
+        ax.set_xlabel("Weather")
+        ax.set_ylabel("Count")
+        ax.set_title("Weather vs Hydration Level")
+        ax.legend(title="Hydration Level")
+
+        # Display in Streamlit
+        st.pyplot(fig)
+
+    with col2:
+        st.write("""
+        **Observations:**
+        - On observe que les conditions météorologiques influencent le niveau d'hydratation des individus.
+        - Par temps froid, une proportion plus élevée d'individus présente un niveau d'hydratation "Poor", ce qui suggère que la froid peut réduire la sensation de soif et donc la consommation d'eau.""")
+
+with tab4:
+    col1, col2 = st.columns([1, 1]) 
+    with col1:
+
+        # Ensure ordered category
+        df_grpWeight['Weather'] = pd.Categorical(
+            df_grpWeight['Weather'],
+            categories=['Cold', 'Normal', 'Hot'],
+            ordered=True
+        )
+
+        # Create figure
+        fig, ax = plt.subplots(figsize=(6, 4))
+
+        sns.boxplot(
+            data=df_grpWeight,
+            x="Weather",
+            y="Daily Water Intake",
+            hue="Weight Group",
+            palette=palette_weight,
+            ax=ax
+        )
+
+        ax.set_title("Daily Water Intake by Weather and Weight Group")
+        ax.set_xlabel("Weather")
+        ax.set_ylabel("Daily Water Intake (liters)")
+        ax.legend(title="Weight Group")
+
+        # Display in Streamlit
+        st.pyplot(fig)
+    
+    with col2:
+        st.write("""
+        **Observations:**
+        - On observe que les individus plus lourds ont tendance à consommer davantage d'eau, ce qui est logique car un poids corporel plus élevé nécessite une hydratation accrue.
+        - De plus, la consommation d'eau augmente avec la température, ce qui est cohérent avec le fait que les besoins en hydratation augmentent par temps chaud en raison de la transpiration accrue.
+        """)
+
