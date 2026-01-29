@@ -6,7 +6,7 @@ import seaborn as sns
 
 # Page config
 st.set_page_config(
-    page_title="Water Intake Analysis",
+    page_title="Analyse de l'hydratation dans le monde",
     page_icon="💧",
     layout="wide",
 
@@ -32,14 +32,14 @@ df_grpWeight["Weight Group"] = pd.cut(
 
 
 
-st.title("Water Intake Analysis 📊")
+st.title("Analyse de l'hydratation dans le monde 📊")
 st.write("""Ce dashboard présente une analyse des données relatives à la consommation d'eau quotidienne des individus, en fonction de divers facteurs tels que l'âge, le poids, le genre, le niveau d'activité physique, le niveau d'hydratation et les conditions météorologiques.""")#----------------------------------------
 
 
 
 
 # Tabs
-st.subheader("Overview Tabs")
+st.subheader("Data originel")
 tab1, tab2, tab3, tab4, tab5 ,tab6= st.tabs(["Age", "Poids", "Genre", "Activité Physique", "Niveau d'Hydratation", "Apport quotidien en Eau"])
 
 
@@ -55,11 +55,11 @@ with tab1:
         ax.hist(df["Age"].dropna())
         ax.set_xlabel("Age")
         ax.set_ylabel("Count")
-        ax.set_title("Distribution of Age")
+        ax.set_title("Répartition de l'âge")
         mean_age = df["Age"].mean()
         median_age = df["Age"].median()
-        ax.axvline(mean_age,color='red', linestyle='dashed', linewidth=1 , label=f"Mean age: {mean_age:.1f}")
-        ax.axvline(median_age,color='green', linestyle='dashed', linewidth=1 , label=f"Median age: {median_age:.1f}")
+        ax.axvline(mean_age,color='red', linestyle='dashed', linewidth=1 , label=f"Âge moyen: {mean_age:.1f}")
+        ax.axvline(median_age,color='green', linestyle='dashed', linewidth=1 , label=f"Âge médian: {median_age:.1f}")
         ax.legend()
         st.pyplot(fig)
     
@@ -80,13 +80,13 @@ with tab2:
         fig, ax = plt.subplots(figsize=(4,3))
 
         ax.hist(df["Weight"].dropna())
-        ax.set_xlabel("Weight")
-        ax.set_ylabel("Count")
-        ax.set_title("Distribution of Weight")
+        ax.set_xlabel("Poids")
+        ax.set_ylabel("Nombre")
+        ax.set_title("Répartition of Weight")
         mean_weight = df["Weight"].mean()
         median_weight = df["Weight"].median()
-        ax.axvline(mean_weight,color='red', linestyle='dashed', linewidth=1 , label=f"Mean weight: {mean_weight:.1f}")
-        ax.axvline(median_weight,color='green', linestyle='dashed', linewidth=1 , label=f"Median weight: {median_weight:.1f}")
+        ax.axvline(mean_weight,color='red', linestyle='dashed', linewidth=1 , label=f"Poids moyen: {mean_weight:.1f}")
+        ax.axvline(median_weight,color='green', linestyle='dashed', linewidth=1 , label=f"Poids médian: {median_weight:.1f}")
         ax.legend()
         st.pyplot(fig)
     
@@ -105,9 +105,9 @@ with tab3:
         fig, ax = plt.subplots(figsize=(4,3))
 
         ax.hist(df["Gender"].dropna())
-        ax.set_xlabel("Gender")
-        ax.set_ylabel("Count")
-        ax.set_title("Distribution of Gender")
+        ax.set_xlabel("Genre")
+        ax.set_ylabel("Nombre")
+        ax.set_title("Répartition des genres")
         st.pyplot(fig)
 
     with col2:
@@ -124,10 +124,10 @@ with tab4:
     with col1:
         fig, ax = plt.subplots(figsize=(4,3))
 
-        ax.hist(df["Physical Activity Level"].dropna())
-        ax.set_xlabel("Physical Activity Level")
+        ax.hist(df["Activité Physique"].dropna())
+        ax.set_xlabel("Activité Physique")
         ax.set_ylabel("Count")
-        ax.set_title("Distribution of Physical Activity Level")
+        ax.set_title("Répartition de l'activité physique")
         st.pyplot(fig)
 
     with col2:
@@ -145,9 +145,9 @@ with tab5:
         fig, ax = plt.subplots(figsize=(4,3))
 
         ax.hist(df["Hydration Level"].dropna())
-        ax.set_xlabel("Hydration Level")
+        ax.set_xlabel("Niveau d'hydratation")
         ax.set_ylabel("Count")
-        ax.set_title("Distribution of Hydration Level")
+        ax.set_title("Répartition of niveau d'hydratation")
         
         st.pyplot(fig)
 
@@ -169,9 +169,9 @@ with tab6:
             color="blue",
             ax=ax
         )
-        ax.set_xlabel("Daily Water Intake (liters)")
-        ax.set_ylabel("Count")
-        ax.set_title("Distribution of Daily Water Intake")
+        ax.set_xlabel("Consommation d'eau")
+        ax.set_ylabel("Nombre")
+        ax.set_title("Répartition de la consommation d'eau quotidienne")
         st.pyplot(fig)
 
     with col2:
@@ -237,19 +237,19 @@ def make_tables(dataframe):
 good_tables = make_tables(df_good)
 bad_tables = make_tables(df_bad)
 
-st.subheader("MEAN & MEDIAN Poor Daily Water Intake")
-tab1, tab2= st.tabs(["Mean", "Median"])
+st.subheader("Moyennes & Médianes de la consommation d'eau par niveau d'hydratation")
+tab1, tab2= st.tabs(["Moyennes", "Médianes"])
 
 with tab1:
     col1, col2 = st.columns([1, 1]) 
     with col1:
-        st.markdown("Good Hydration Level")
+        st.markdown("Suffisant")
         st.dataframe(
             good_tables[0],
             use_container_width=True
         )
     with col2:
-        st.markdown("Poor Hydration Level")
+        st.markdown("Insuffisant")
         st.dataframe(
             bad_tables[0],
             use_container_width=True
@@ -260,13 +260,13 @@ with tab1:
 with tab2:
     col1, col2 = st.columns([1, 1])
     with col1:
-        st.markdown("Good Hydration Level")
+        st.markdown("Suffisant")
         st.dataframe(
             good_tables[1],
             use_container_width=True
         )
     with col2:
-        st.markdown("Poor Hydration Level")
+        st.markdown("Insuffisant")
         st.dataframe(
             bad_tables[1],
             use_container_width=True
@@ -274,8 +274,8 @@ with tab2:
     median_diff = (good_tables[1] - bad_tables[1]).stack().mean().round(2).item()
     st.markdown(f"La médiane de la différence de consommation d'eau quotidienne entre les niveaux d'hydratation bon et mauvais est de : **{median_diff}** litres.")
 
-st.subheader("Analysis")
-tab1, tab2, tab3 ,tab4,tab5= st.tabs(["Genre", "Activité Physique", "Weather" , "Poids","Poids & Weather"])
+st.subheader("Analyse")
+tab1, tab2, tab3 ,tab4,tab5= st.tabs(["Genre", "Activité Physique", "Climat" , "Poids","Poids & Climat"])
 
 with tab1:
     col1, col2 = st.columns([1, 1]) 
@@ -297,9 +297,9 @@ with tab1:
         )
 
         # Labels
-        ax.set_title("Daily Water Intake by Gender")
-        ax.set_xlabel("Gender")
-        ax.set_ylabel("Daily Water Intake (liters)")
+        ax.set_title("Consommation par genre")
+        ax.set_xlabel("Genre")
+        ax.set_ylabel("Consommation d'eau quotidienne")
 
         # Display in Streamlit
         st.pyplot(fig, use_container_width=True)
@@ -334,9 +334,9 @@ with tab2:
             activity_water.values
         )
 
-        ax.set_title("Average Daily Water Intake by Physical Activity Level")
-        ax.set_xlabel("Physical Activity Level")
-        ax.set_ylabel("Daily Water Intake (liters)")
+        ax.set_title("Consommation quotidienne d'eau par niveau d'activité physique")
+        ax.set_xlabel("Acitivité physique")
+        ax.set_ylabel("Consommation d'eau quotidienne")
 
         # Display in Streamlit
         st.pyplot(fig)
@@ -375,10 +375,10 @@ with tab3:
             ax=ax
         )
 
-        ax.set_xlabel("Weather")
-        ax.set_ylabel("Count")
-        ax.set_title("Weather vs Hydration Level")
-        ax.legend(title="Hydration Level")
+        ax.set_xlabel("Climat")
+        ax.set_ylabel("Nombre")
+        ax.set_title("Qualité de l'hydratation selon le climat")
+        ax.legend(title="Niveau d'hydratation")
 
         # Display in Streamlit
         st.pyplot(fig)
@@ -395,7 +395,7 @@ with tab4:
     with col1:
 
 
-        st.subheader("Hydration Level by Weight Group")
+        st.subheader("Hydratation selon le poids")
 
         # Group counts
         counts = (
@@ -413,10 +413,10 @@ with tab4:
             ax=ax
         )
 
-        ax.set_xlabel("Weight Group")
-        ax.set_ylabel("Count")
-        ax.set_title("Hydration Level by Weight Group")
-        ax.legend(title="Hydration Level")
+        ax.set_xlabel("Poids")
+        ax.set_ylabel("Nombre")
+        ax.set_title("Hydratation selon le poids")
+        ax.legend(title="Niveau d'hydratation")
 
         # Totals per weight group
         totals = counts.sum(axis=1)
@@ -474,10 +474,10 @@ with tab5:
             ax=ax
         )
 
-        ax.set_title("Daily Water Intake by Weather and Weight Group")
-        ax.set_xlabel("Weather")
-        ax.set_ylabel("Daily Water Intake (liters)")
-        ax.legend(title="Weight Group")
+        ax.set_title("Consommation d'eau par poids et par climat")
+        ax.set_xlabel("Climat")
+        ax.set_ylabel("Consommation d'eau quotidienne")
+        ax.legend(title="Poids")
 
         # Display in Streamlit
         st.pyplot(fig)
